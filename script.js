@@ -400,7 +400,7 @@ function generatePdf(element) {
         }
 
         doc.setFontSize(11);
-        doc.setFont("customFont", 'normal");
+        doc.setFont("customFont", 'normal');
 
         var pokes = parsedTeam.teams[0].pokemon;
         var statX = 100;
