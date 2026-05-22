@@ -45,21 +45,28 @@ const sheets = document.getElementsByName('sheet');
 function getStats(poke, ivs, evs, level, nat) {
 
     var ret = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
+    var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 
     var baseStats = pokedex[poke];
-    var nature = natures[nat];
+    if (!baseStats) {
+        return ret;
+    }
 
-    for (const [key, value] of Object.entries(baseStats)){
-        if (key == 'hp'){
-            var stat = Math.floor(((((2 * baseStats.hp) + (evs.hp/4) + ivs.hp) * level)/100) + level + 10);
-            ret['hp'] = stat;
+    var natureName = (nat || 'Serious').replace(/\s+Nature$/i, '').trim();
+    var natureMod = natures[natureName] || natures['Serious'] || natures['Hardy'];
+
+    for (let i = 0; i < statKeys.length; i++) {
+        var key = statKeys[i];
+        var mult = (natureMod && natureMod[key]) ? natureMod[key] : 1;
+
+        if (key === 'hp') {
+            ret['hp'] = Math.floor(((((2 * baseStats.hp) + (evs.hp / 4) + ivs.hp) * level) / 100) + level + 10);
         } else {
-            var stat = Math.floor(Math.floor((((((2 * baseStats[key]) + (evs[key]/4) + ivs[key]) * level) / 100) + 5)) * nature[key]);
-            ret[key] = stat;
+            ret[key] = Math.floor(Math.floor((((((2 * baseStats[key]) + (evs[key] / 4) + ivs[key]) * level) / 100) + 5)) * mult);
         }
     }
 
-    return ret
+    return ret;
 
 }
 
@@ -463,7 +470,11 @@ function generatePdf(element) {
             doc.text(level.toString(), statX + (i % 2) * (gapX - 1), y + 14 + statTextOffset, 'right');
 
             for (let j = 0; j < statOrder.length; j++) {
-                doc.text(stats[statOrder[j]].toString(), statX + (i % 2) * (gapX - 1), y + statLabelY[j] + statTextOffset, 'right');
+                var statVal = stats[statOrder[j]];
+                if (statVal == null || isNaN(statVal)) {
+                    statVal = 0;
+                }
+                doc.text(String(statVal), statX + (i % 2) * (gapX - 1), y + statLabelY[j] + statTextOffset, 'right');
             }
         }
 
