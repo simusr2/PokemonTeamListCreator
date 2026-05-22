@@ -42,6 +42,27 @@ for (let i = 0; i < langs.length; i++) {
 const button = document.getElementById('print');
 const sheets = document.getElementsByName('sheet');
 
+function getStats(poke, ivs, evs, level, nat) {
+
+    var ret = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
+
+    var baseStats = pokedex[poke];
+    var nature = natures[nat];
+
+    for (const [key, value] of Object.entries(baseStats)){
+        if (key == 'hp'){
+            var stat = Math.floor(((((2 * baseStats.hp) + (evs.hp/4) + ivs.hp) * level)/100) + level + 10);
+            ret['hp'] = stat;
+        } else {
+            var stat = Math.floor(Math.floor((((((2 * baseStats[key]) + (evs[key]/4) + ivs[key]) * level) / 100) + 5)) * nature[key]);
+            ret[key] = stat;
+        }
+    }
+
+    return ret
+
+}
+
 function sheetChange(event) {
 
     if (event.target.id == "reg"){
@@ -413,9 +434,21 @@ function generatePdf(element) {
         for (let i = 0; i < pokes.length; i++) {
             var y = 59.5 + gapY * Math.floor(i / 2);
 
+            var nature = 'Serious';
+            if (pokes[i].nature) {
+                nature = pokes[i].nature;
+            }
+
             var level = 100;
             if (pokes[i].level) {
                 level = pokes[i].level;
+            }
+
+            var ivs = {'hp': 31, 'atk': 31, 'def': 31, 'spa': 31, 'spd': 31, 'spe': 31};
+            if (pokes[i].ivs) {
+                for (const [key, value] of Object.entries(pokes[i].ivs)) {
+                    ivs[key] = value;
+                }
             }
 
             var evs = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
@@ -425,14 +458,12 @@ function generatePdf(element) {
                 }
             }
 
+            var stats = getStats(pokes[i].name, ivs, evs, level, nature);
+
             doc.text(level.toString(), statX + (i % 2) * (gapX - 1), y + 14 + statTextOffset, 'right');
 
             for (let j = 0; j < statOrder.length; j++) {
-                var evVal = evs[statOrder[j]];
-                if (evVal == null || isNaN(evVal)) {
-                    evVal = 0;
-                }
-                doc.text(String(evVal), statX + (i % 2) * (gapX - 1), y + statLabelY[j] + statTextOffset, 'right');
+                doc.text(stats[statOrder[j]].toString(), statX + (i % 2) * (gapX - 1), y + statLabelY[j] + statTextOffset, 'right');
             }
         }
 
