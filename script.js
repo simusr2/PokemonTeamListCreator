@@ -280,7 +280,7 @@ function generatePdf(element) {
 
             var itemId = 'NOITEM';
             if (pokes[i].item){
-                itemId = ItemTranslator[pokes[i].item];
+                itemId = ItemTranslator[pokes[i].item] || 'NOITEM';
             }
 
             var nature = 'Serious';
@@ -320,8 +320,13 @@ function generatePdf(element) {
             }
             var ability = window['abilities' + chosenLang][abilityId];
             var item = 'NO ITEM';
-            if (itemId != 'NOITEM'){
-                item = window['items' + chosenLang][itemId];
+            if (pokes[i].item) {
+                if (itemId != 'NOITEM') {
+                    item = window['items' + chosenLang][itemId];
+                }
+                if (item == null || item === 'NO ITEM') {
+                    item = pokes[i].item + '\u00B0';
+                }
             }
             var movs = [];
             for (let x = 0; x < pokes[i].moves.length; x++){
@@ -685,15 +690,23 @@ function generatePdf(element) {
                     }
                     doc.text(window['abilities' + currentLang][id], 22+c_width*(i+1), ystart+2*ygap+8*ygap*u,"center");
                     doc.setFontSize(startFontSize);
-                    id = ItemTranslator[pokes[i].item];
+                    var itemLabel = 'NO ITEM';
+                    if (pokes[i].item) {
+                        id = ItemTranslator[pokes[i].item];
+                        if (id && window['items' + currentLang][id]) {
+                            itemLabel = window['items' + currentLang][id];
+                        } else {
+                            itemLabel = pokes[i].item + '\u00B0';
+                        }
+                    }
                     var itemFontSize=startFontSize;
-                    var itemTextWidth= doc.getStringUnitWidth(window['items' + currentLang][id])*itemFontSize;
+                    var itemTextWidth= doc.getStringUnitWidth(itemLabel)*itemFontSize;
                     while (itemTextWidth>limitTextWidth) {
                         itemFontSize-=0.5;
                         doc.setFontSize(itemFontSize);
-                        itemTextWidth= doc.getStringUnitWidth(window['items' + currentLang][id])*itemFontSize;
+                        itemTextWidth= doc.getStringUnitWidth(itemLabel)*itemFontSize;
                     }
-                    doc.text(window['items' + currentLang][id], 22+c_width*(i+1), ystart+3*ygap+8*ygap*u,"center");
+                    doc.text(itemLabel, 22+c_width*(i+1), ystart+3*ygap+8*ygap*u,"center");
                     doc.setFontSize(startFontSize);
                     for (let x = 0; x < pokes[i].moves.length; x++){
                         var moveId = MoveTranslator[pokes[i].moves[x]];
