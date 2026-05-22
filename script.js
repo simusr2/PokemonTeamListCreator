@@ -325,7 +325,7 @@ function generatePdf(element) {
                     item = window['items' + chosenLang][itemId];
                 }
                 if (item == null || item === 'NO ITEM') {
-                    item = pokes[i].item + '\u00B0';
+                    item = pokes[i].item;
                 }
             }
             var movs = [];
@@ -696,7 +696,7 @@ function generatePdf(element) {
                         if (id && window['items' + currentLang][id]) {
                             itemLabel = window['items' + currentLang][id];
                         } else {
-                            itemLabel = pokes[i].item + '\u00B0';
+                            itemLabel = pokes[i].item;
                         }
                     }
                     var itemFontSize=startFontSize;
