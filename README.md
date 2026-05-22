@@ -1,6 +1,16 @@
 # PokemonTeamListCreator
 Creates an Open Team List/Sheet and Close Team List/Sheet from Pokémon Showdown paste
 
+## Source
+
+This repository is maintained at [simusr2/PokemonTeamListCreator](https://github.com/simusr2/PokemonTeamListCreator).
+
+The original project is [DhSufi/PokemonTeamListCreator](https://github.com/DhSufi/PokemonTeamListCreator) ([live demo](https://dhsufi.github.io/PokemonTeamListCreator/)).
+
+### Changes in this fork
+
+- **May 2025**: Fixed PDF generation when a held item has no translation in the item database (for example custom or unreleased items). The list now shows the item name as entered in the Showdown paste instead of crashing.
+
 Update March 2024
 - Added multi language list. Thanks a lot to Aurélien Soula (Axior)
 

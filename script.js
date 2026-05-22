@@ -1,5 +1,10 @@
 'use strict'
 
+// Fork: https://github.com/simusr2/PokemonTeamListCreator
+// Original: https://github.com/DhSufi/PokemonTeamListCreator
+// Fix (May 2025): held items missing from ItemTranslator no longer crash PDF
+// generation; the paste item name is used when no translation exists.
+
 import { Koffing } from './koff.mjs';
 
 //Thanks a lot to @joezhuu for these brilliant changes
