@@ -408,6 +408,7 @@ function generatePdf(element) {
         var gapY = 70;
         var statOrder = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
         var statLabelY = [22, 30, 38, 46, 54, 62];
+        var statTextOffset = 2;
 
         for (let i = 0; i < pokes.length; i++) {
             var y = 59.5 + gapY * Math.floor(i / 2);
@@ -424,14 +425,14 @@ function generatePdf(element) {
                 }
             }
 
-            doc.text(level.toString(), statX + (i % 2) * (gapX - 1), y + 14, 'right');
+            doc.text(level.toString(), statX + (i % 2) * (gapX - 1), y + 14 + statTextOffset, 'right');
 
             for (let j = 0; j < statOrder.length; j++) {
                 var evVal = evs[statOrder[j]];
                 if (evVal == null || isNaN(evVal)) {
                     evVal = 0;
                 }
-                doc.text(String(evVal), statX + (i % 2) * (gapX - 1), y + statLabelY[j], 'right');
+                doc.text(String(evVal), statX + (i % 2) * (gapX - 1), y + statLabelY[j] + statTextOffset, 'right');
             }
         }
 
