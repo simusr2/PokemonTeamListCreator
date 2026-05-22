@@ -350,7 +350,7 @@ ShowdownParser.regexes = {
   name: /^([^()=@]{2,})/i,
   gender: /\((F|M)\)/i,
   item: /@\s?(.*)$/i,
-  eivs: /^((?:E[Ii]Vs)|(?:SPs)):\s?(.*)$/i,
+  eivs: /^((?:[EI]Vs)|(?:SPs)):\s?(.*)$/i,
   eivs_value: /^([0-9]+)\s+(hp|atk|def|spa|spd|spe)$/i,
   move: /^[-~]\s?(.*)$/i,
   nature: /^(.*)\s+Nature$/,

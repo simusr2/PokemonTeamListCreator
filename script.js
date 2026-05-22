@@ -4,7 +4,7 @@
 // Original: https://github.com/DhSufi/PokemonTeamListCreator
 // Fix (May 2025): held items missing from ItemTranslator no longer crash PDF
 // generation; the paste item name is used when no translation exists.
-// Stats (May 2025): Pokémon Champions formula (Stat Points, IV 31).
+// Stats (May 2025): Pokémon Champions formula (Showdown champions mod).
 
 import { Koffing } from './koff.mjs';
 
@@ -43,7 +43,8 @@ for (let i = 0; i < langs.length; i++) {
 const button = document.getElementById('print');
 const sheets = document.getElementsByName('sheet');
 
-// Pokémon Champions: IV 31, Stat Points (0–32, 66 total). See https://vgc.tools/guides/stats
+// Pokémon Champions stat formula (Showdown mod "champions", statModify):
+// https://github.com/smogon/pokemon-showdown/blob/master/data/mods/champions/scripts.ts
 function isChampionsStatPoints(evs) {
     var total = 0;
     var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -76,11 +77,44 @@ function toStatPoints(evs) {
     return statPoints;
 }
 
+function getNaturePlusMinus(natureName) {
+    var natureMod = natures[natureName] || natures['Serious'] || natures['Hardy'];
+    var plus = null;
+    var minus = null;
+    var statKeys = ['atk', 'def', 'spa', 'spd', 'spe'];
+
+    for (let i = 0; i < statKeys.length; i++) {
+        var key = statKeys[i];
+        if (natureMod[key] === 1.1) {
+            plus = key;
+        }
+        if (natureMod[key] === 0.9) {
+            minus = key;
+        }
+    }
+
+    return {plus: plus, minus: minus};
+}
+
+function championsStatModify(base, statPoints, statName, plus, minus) {
+    if (statName === 'hp') {
+        return base + statPoints + 75;
+    }
+
+    var stat = base + statPoints + 20;
+    if (plus === statName) {
+        stat = Math.trunc(Math.trunc(stat * 110) / 100);
+    } else if (minus === statName) {
+        stat = Math.trunc(Math.trunc(stat * 90) / 100);
+    }
+
+    return stat;
+}
+
 function getStats(poke, evs, level, nat) {
 
     var ret = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
     var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-    var iv = 31;
 
     var baseStats = pokedex[poke];
     if (!baseStats) {
@@ -89,17 +123,11 @@ function getStats(poke, evs, level, nat) {
 
     var statPoints = toStatPoints(evs);
     var natureName = (nat || 'Serious').replace(/\s+Nature$/i, '').trim();
-    var natureMod = natures[natureName] || natures['Serious'] || natures['Hardy'];
+    var natureMods = getNaturePlusMinus(natureName);
 
     for (let i = 0; i < statKeys.length; i++) {
         var key = statKeys[i];
-        var mult = (natureMod && natureMod[key]) ? natureMod[key] : 1;
-
-        if (key === 'hp') {
-            ret['hp'] = Math.floor((((2 * baseStats.hp) + iv + statPoints.hp) * level) / 100) + level + 10;
-        } else {
-            ret[key] = Math.floor((Math.floor((((2 * baseStats[key]) + iv + statPoints[key]) * level) / 100) + 5) * mult);
-        }
+        ret[key] = championsStatModify(baseStats[key], statPoints[key], key, natureMods.plus, natureMods.minus);
     }
 
     return ret;
