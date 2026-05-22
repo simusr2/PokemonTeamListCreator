@@ -272,7 +272,10 @@ var _ShowdownParser = class {
       if (data === null) {
         return false;
       }
-      const prop = data[1].toLowerCase();
+      var prop = data[1].toLowerCase();
+      if (prop === "sps") {
+        prop = "evs";
+      }
       const values = data[2].split("/");
       const limit = prop === "evs" ? 255 : 31;
       values.forEach(function(stat) {
@@ -347,7 +350,7 @@ ShowdownParser.regexes = {
   name: /^([^()=@]{2,})/i,
   gender: /\((F|M)\)/i,
   item: /@\s?(.*)$/i,
-  eivs: /^([EI]Vs):\s?(.*)$/i,
+  eivs: /^((?:E[Ii]Vs)|(?:SPs)):\s?(.*)$/i,
   eivs_value: /^([0-9]+)\s+(hp|atk|def|spa|spd|spe)$/i,
   move: /^[-~]\s?(.*)$/i,
   nature: /^(.*)\s+Nature$/,

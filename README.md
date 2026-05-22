@@ -10,6 +10,7 @@ The original project is [DhSufi/PokemonTeamListCreator](https://github.com/DhSuf
 ### Changes in this fork
 
 - **May 2025**: Fixed PDF generation when a held item has no translation in the item database (for example custom or unreleased items). The list now shows the item name as entered in the Showdown paste instead of crashing.
+- **May 2025**: Staff list stats use the [Pokémon Champions](https://vgc.tools/guides/stats) formula (IV 31, Stat Points 0–32 / 66 total). Paste lines with `EVs:` or `SPs:` are supported; classic EV spreads are converted automatically when values exceed the Champions limits.
 
 Update March 2024
 - Added multi language list. Thanks a lot to Aurélien Soula (Axior)

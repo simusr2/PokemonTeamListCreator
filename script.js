@@ -4,6 +4,7 @@
 // Original: https://github.com/DhSufi/PokemonTeamListCreator
 // Fix (May 2025): held items missing from ItemTranslator no longer crash PDF
 // generation; the paste item name is used when no translation exists.
+// Stats (May 2025): Pokémon Champions formula (Stat Points, IV 31).
 
 import { Koffing } from './koff.mjs';
 
@@ -42,16 +43,51 @@ for (let i = 0; i < langs.length; i++) {
 const button = document.getElementById('print');
 const sheets = document.getElementsByName('sheet');
 
-function getStats(poke, ivs, evs, level, nat) {
+// Pokémon Champions: IV 31, Stat Points (0–32, 66 total). See https://vgc.tools/guides/stats
+function isChampionsStatPoints(evs) {
+    var total = 0;
+    var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+
+    for (let i = 0; i < statKeys.length; i++) {
+        var val = evs[statKeys[i]] || 0;
+        if (val > 32) {
+            return false;
+        }
+        total += val;
+    }
+
+    return total <= 66;
+}
+
+function toStatPoints(evs) {
+    var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+    var statPoints = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
+    var useDirect = isChampionsStatPoints(evs);
+
+    for (let i = 0; i < statKeys.length; i++) {
+        var key = statKeys[i];
+        var val = evs[key] || 0;
+        statPoints[key] = useDirect ? val : Math.floor((val + 4) / 8);
+        if (statPoints[key] > 32) {
+            statPoints[key] = 32;
+        }
+    }
+
+    return statPoints;
+}
+
+function getStats(poke, evs, level, nat) {
 
     var ret = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
     var statKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+    var iv = 31;
 
     var baseStats = pokedex[poke];
     if (!baseStats) {
         return ret;
     }
 
+    var statPoints = toStatPoints(evs);
     var natureName = (nat || 'Serious').replace(/\s+Nature$/i, '').trim();
     var natureMod = natures[natureName] || natures['Serious'] || natures['Hardy'];
 
@@ -60,9 +96,9 @@ function getStats(poke, ivs, evs, level, nat) {
         var mult = (natureMod && natureMod[key]) ? natureMod[key] : 1;
 
         if (key === 'hp') {
-            ret['hp'] = Math.floor(((((2 * baseStats.hp) + (evs.hp / 4) + ivs.hp) * level) / 100) + level + 10);
+            ret['hp'] = Math.floor((((2 * baseStats.hp) + iv + statPoints.hp) * level) / 100) + level + 10;
         } else {
-            ret[key] = Math.floor(Math.floor((((((2 * baseStats[key]) + (evs[key] / 4) + ivs[key]) * level) / 100) + 5)) * mult);
+            ret[key] = Math.floor((Math.floor((((2 * baseStats[key]) + iv + statPoints[key]) * level) / 100) + 5) * mult);
         }
     }
 
@@ -451,13 +487,6 @@ function generatePdf(element) {
                 level = pokes[i].level;
             }
 
-            var ivs = {'hp': 31, 'atk': 31, 'def': 31, 'spa': 31, 'spd': 31, 'spe': 31};
-            if (pokes[i].ivs) {
-                for (const [key, value] of Object.entries(pokes[i].ivs)) {
-                    ivs[key] = value;
-                }
-            }
-
             var evs = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0};
             if (pokes[i].evs) {
                 for (const [key, value] of Object.entries(pokes[i].evs)) {
@@ -465,7 +494,7 @@ function generatePdf(element) {
                 }
             }
 
-            var stats = getStats(pokes[i].name, ivs, evs, level, nature);
+            var stats = getStats(pokes[i].name, evs, level, nature);
 
             doc.text(level.toString(), statX + (i % 2) * (gapX - 1), y + 14 + statTextOffset, 'right');
 
